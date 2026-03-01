@@ -9,6 +9,12 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
+  // Log every incoming request
+  app.use((req: import('express').Request, _res: import('express').Response, next: import('express').NextFunction) => {
+    console.log(`→ ${req.method} ${req.originalUrl}`);
+    next();
+  });
+
   const httpMetricsInterceptor = app.get(HttpMetricsInterceptor);
   app.useGlobalInterceptors(httpMetricsInterceptor);
 
