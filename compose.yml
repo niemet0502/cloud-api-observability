@@ -1,8 +1,9 @@
 services:
   api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
+    image: mariusniemet/api-observability:latest
+    # build:
+    #   context: ./api
+    #   dockerfile: Dockerfile
     container_name: api
     environment:
       # Adjust these to match your Nest/TypeORM configuration if needed
