@@ -18,6 +18,7 @@ export class HttpMetricsInterceptor implements NestInterceptor {
     const request = httpContext.getRequest<Request>();
     const response = httpContext.getResponse<Response>();
 
+    const start = process.hrtime.bigint();
     const method = request.method;
     // Use the matched route path when available; fallback to url without query string
     const route =
@@ -30,10 +31,24 @@ export class HttpMetricsInterceptor implements NestInterceptor {
       tap({
         next: () => {
           const status = String(response.statusCode);
+          const diffNs = Number(process.hrtime.bigint() - start);
+          const seconds = diffNs / 1e9;
+
+          this.metrics.httpRequestDurationSeconds.observe(
+            { method, route, status },
+            seconds,
+          );
           this.metrics.apiRequestsSuccessTotal.inc({ method, route, status });
         },
         error: (err: any) => {
           const status = String(err?.status ?? err?.statusCode ?? 500);
+          const diffNs = Number(process.hrtime.bigint() - start);
+          const seconds = diffNs / 1e9;
+
+          this.metrics.httpRequestDurationSeconds.observe(
+            { method, route, status },
+            seconds,
+          );
           this.metrics.apiRequestsFailedTotal.inc({ method, route, status });
         },
       }),

@@ -20,6 +20,7 @@ export class MetricsService {
   readonly apiRequestsTotal: Counter;
   readonly apiRequestsSuccessTotal: Counter;
   readonly apiRequestsFailedTotal: Counter;
+  readonly httpRequestDurationSeconds: Histogram;
 
   constructor() {
     this.registry = new Registry();
@@ -73,6 +74,15 @@ export class MetricsService {
       name: 'api_requests_failed_total',
       help: 'Total number of failed HTTP responses',
       labelNames: ['method', 'route', 'status'],
+      registers: [this.registry],
+    });
+
+    this.httpRequestDurationSeconds = new Histogram({
+      name: 'http_request_duration_seconds',
+      help: 'HTTP request latency in seconds',
+      labelNames: ['method', 'route', 'status'],
+      // Buckets chosen for typical API latencies; adjust as needed
+      buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
       registers: [this.registry],
     });
   }
